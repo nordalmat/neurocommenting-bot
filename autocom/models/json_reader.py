@@ -1,7 +1,7 @@
 import json
-from typing import Any, Optional
 import sys
 from os.path import dirname
+from typing import Any, Optional
 
 
 class JSONClient:

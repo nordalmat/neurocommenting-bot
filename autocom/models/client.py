@@ -1,7 +1,8 @@
-from pyrogram.client import Client
-from os.path import dirname
 import sys
+from os.path import dirname
 from pathlib import Path
+
+from pyrogram.client import Client
 
 
 class CustomClient(Client):
