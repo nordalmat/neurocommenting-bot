@@ -1,0 +1,6 @@
+.env
+log_ext.txt
+log.txt
+.venv/
+__pycache__/
+*.session
