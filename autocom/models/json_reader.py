@@ -9,10 +9,10 @@ class JSONClient:
 
     def get_id(self) -> int:
         return int(self.id)
-    
-    def get_name(self) -> str: 
+
+    def get_name(self) -> str:
         return str(self["name"])
-    
+
     def get_api_id(self) -> str:
         return str(self["apiId"])
 
@@ -20,14 +20,14 @@ class JSONClient:
         return str(self["apiHash"])
 
     def get_prompt(self) -> str:
-        return str(self["gptPrompt"])    
-    
+        return str(self["gptPrompt"])
+
     def get_active_status(self) -> bool:
-        return self["isActive"] == 1 
-    
+        return self["isActive"] == 1
+
     def get_ignore_step(self) -> int:
         return int(self["countOfIgnoredPostBetweenExecutions"])
-    
+
     def get_ban_list(self) -> list[int]:
         return self["banListId"]
 
@@ -41,17 +41,20 @@ class JSONReader:
 
         with open(application_path + '/view.json', encoding='utf-8') as f:
             self.data = json.load(f)
-            
+
     def get_data(self) -> dict:
         return self.data
-    
+
     def get_clients_data(self) -> list[JSONClient]:
         return self.data["clients"]
-    
+
     def get_open_ai_api_key(self) -> Optional[str]:
         if len(self.data["apiKeys"]) > 0:
             return self.data["apiKeys"][0]["key"]
         return None
-    
+
+    def get_settings(self) -> dict:
+        return self.data["settings"]
+
 
 json_reader = JSONReader()

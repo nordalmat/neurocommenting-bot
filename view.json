@@ -1,10 +1,25 @@
 {
     "clients": [
         {
+            "id": 0,
+            "name": "",
+            "apiId": 0,
+            "apiHash": "",
+            "gptPrompt": "",
+            "isActive": 1,
+            "countOfIgnoredPostBetweenExecutions": "1",
+            "banListId": []
         }
     ],
     "apiKeys": [
         {
+            "id": 0,
+            "key": ""
         }
-    ]
+    ],
+    "settings": {
+        "contactUsername": "",
+        "sendBanNotifications": 1,
+        "sendApiKeyNotifications": 1
+    }
 }

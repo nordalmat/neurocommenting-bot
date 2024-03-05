@@ -4,3 +4,7 @@ log.txt
 .venv/
 __pycache__/
 *.session
+*.session-journal
+build/
+dist/
+*.spec

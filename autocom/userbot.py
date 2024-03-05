@@ -15,18 +15,18 @@ from pyrogram.types import Message
 
 
 nest_asyncio.apply()
-sys.path.append("autocom/userbot.py") 
+sys.path.append("autocom/userbot.py")
 
 apps: list[CustomClient] = []
 for client in json_reader.get_clients_data():
-    app = CustomClient(name="data/" + client["name"],
-                        api_id=int(client["apiId"]),
-                        api_hash=client["apiHash"],
-                        prompt=client["gptPrompt"],
-                        is_active=bool(client["isActive"]),
-                        ignore_step=int(client["countOfIgnoredPostBetweenExecutions"]))
+    app = CustomClient(id=int(client["id"]),
+                       name="data/" + client["name"],
+                       api_id=int(client["apiId"]),
+                       api_hash=client["apiHash"],
+                       prompt=client["gptPrompt"],
+                       is_active=bool(client["isActive"]),
+                       ignore_step=int(client["countOfIgnoredPostBetweenExecutions"]))
     apps.append(app)
-
 
 
 last_media_group = 1000000
@@ -34,11 +34,16 @@ queue = Queue()
 length_delay = 0
 length = 0
 
+settings = json_reader.get_settings()
+contact_user_name = settings["contactUsername"]
+send_ban_notifications = settings["sendBanNotifications"]
+send_api_notifications = settings["sendApiKeyNotifications"]
 
 
 @list_on_message(apps, filters.channel)
 async def answer(client: CustomClient, message: Message):
-    if message is None or (message.text is None and message.caption is None): return
+    if message is None or (message.text is None and message.caption is None):
+        return
     message_text = message.text if message.text is not None else message.caption
     global last_media_group, queue, length_delay
     message_log = message_text.replace(
@@ -50,8 +55,9 @@ async def answer(client: CustomClient, message: Message):
         extensive_log.debug(
             f"|{message.chat.title}|{client.name}|Skipping message. (media group: last - {last_media_group}, message - {message.media_group_id}).")
         return
-    
-    client.comment_count_by_chat[message.chat.id] = client.comment_count_by_chat.get(message.chat.id, 0) + 1
+
+    client.comment_count_by_chat[message.chat.id] = client.comment_count_by_chat.get(
+        message.chat.id, 0) + 1
     if (client.comment_count_by_chat[message.chat.id] - 1) % client.ignore_step != 0:
         simple_log.info(
             f"|{message.chat.title}|{client.name}|:Caught message. (Text: {message_log}) - skipping, current message count is {client.comment_count_by_chat[message.chat.id] - 1}")
@@ -76,6 +82,9 @@ async def answer(client: CustomClient, message: Message):
             f"|{message.chat.title}|{client.name}|:Banned or couldn't get comments.")
         extensive_log.error(
             f"|{message.chat.title}|{client.name}|:Banned or couldn't get comments.")
+        if send_ban_notifications:
+            await client.send_message(contact_user_name, f"I was banned at {message.chat.title} (@{message.chat.username})")
+        client.add_to_banlist(message.chat, json_reader.get_data())
         return
     length_delay += 1
     post = TextPost(length_delay)
@@ -84,8 +93,10 @@ async def answer(client: CustomClient, message: Message):
     length_delay -= 1
     if response is None:
         return
-    simple_log.info(f"|{message.chat.title}|{client.name}|:Answered: " + response)
-    extensive_log.info(f"|{message.chat.title}|{client.name}|\nPost content: " + message_text.replace("\n\n", "\n") + "\nAnswer: " + response + "\n")
+    simple_log.info(
+        f"|{message.chat.title}|{client.name}|:Answered: " + response)
+    extensive_log.info(f"|{message.chat.title}|{client.name}|\nPost content: " +
+                       message_text.replace("\n\n", "\n") + "\nAnswer: " + response + "\n")
 
 
 async def get_linked(msg, app):
@@ -105,9 +116,9 @@ async def get_forwarded_in_linked(linked, app, msg):
                 return_msg = message
         return return_msg
     except ChannelPrivate:
-        return None   
-    
-    
+        return None
+
+
 async def main():
     simple_log.info('Started!')
     extensive_log.info('Session started')
